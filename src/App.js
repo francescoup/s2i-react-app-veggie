@@ -1,5 +1,5 @@
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Navbar from './components/Navbar/Navbar';
+import Footer from './components/Footer/Footer';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import CategoriesScreen from './Screen/CategoriesScreen';
 import HomeScreen from './Screen/HomeScreen';

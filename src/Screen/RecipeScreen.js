@@ -6,13 +6,14 @@ import { AiOutlineHeart, AiOutlineArrowLeft, AiOutlineEuroCircle } from 'react-i
 import {BsFillPeopleFill} from'react-icons/bs';
 import { BiTime } from 'react-icons/bi';
 import useTitle from '../useTitle';
-import SimilarRecipe from '../components/SimilarRecipe';
+import SimilarRecipe from '../components/SimilarRecipe/SimilarRecipe.js';
 import { useGlobalContext } from '../Context';
 import UseShare from '../UseShare';
 import Skeleton from 'react-loading-skeleton'; 
 import 'react-loading-skeleton/dist/skeleton.css';
-import Error from '../components/Error';
-import LoadingRecipe from '../components/LoadingRecipe';
+import Error from '../components/Error/Error';
+import LoadingRecipe from '../components/LoadingRecipe/LoadingRecipe.js';
+import useFetch from '../useFetch';
 
 
 const RecipeScreen = () => {
@@ -20,49 +21,23 @@ const RecipeScreen = () => {
   const {id} = useParams()
   const [recipeDetails, setRecipeDetails] = useState({});
   const [similarRecipe, setSimilarRecipe] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
   const navigate = useNavigate()
 
-  // Start useSharing elemts
-  const location =  useLocation()
+  //Start useSharing elements
+  const location =  useLocation();
   const prefix = location.pathname;
-  console.log(prefix)
-  const url = `https://s2i-react-test.netlify.app${prefix}`
-  //end useSharing
+  const urls = `https://s2i-react-test.netlify.app${prefix}`;
+  //End useSharing
 
-  const getfullRecipe = async (id) => {
-    setIsLoading(true);
-    setIsError(false);
-    try {
+  const url =`https://api.spoonacular.com/recipes/${id}/information?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}`;
+  //Fetch data with useFetch custom hook
+  const {data, isLoading, isError} = useFetch(url);
+  //Fetch similar recipe details
+  const urlRecipe = `https://api.spoonacular.com/recipes/${id}/similar?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&limitLicence=true&number=4`;
+  const {data: recipes, isLoading: isLoading2, isError: isError2} = useFetch(urlRecipe);
 
-      //fetch recipes details
-  
-      const response = await axios.get(`https://api.spoonacular.com/recipes/${id}/information?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}`);
-      const data = response.data;
-      setRecipeDetails(data);
-  
-      //fetch similar recipes
-    
-      const similar = await axios.get(`https://api.spoonacular.com/recipes/${id}/similar?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&limitLicence=true&number=4`);
-      const dataSimilar = await similar.data;
-      setSimilarRecipe(dataSimilar)
-      
-      
-    } catch (error) {
-      console.log(error)
-      
-      setIsError(true);
-    }
-    setIsLoading(false);
-  }
-
-  useEffect(()=> {
-    getfullRecipe(id)
-  }, [id])
-
-  useTitle(recipeDetails.title)
-  const finalPrize = (recipeDetails.pricePerServing / 100).toFixed(2)
+  useTitle(data.title)
+  const finalPrize = (data.pricePerServing / 100).toFixed(2)
 
   if(isLoading) {
     return <LoadingRecipe/>
@@ -77,32 +52,32 @@ const RecipeScreen = () => {
 
       <Wrapper>
         <nav>
-          <div onClick={() => navigate(-1)}>
+          <div className='btn' onClick={() => navigate(-1)}>
             <AiOutlineArrowLeft style={{cursor:'pointer'}}/>
           </div>
-          <h4>{recipeDetails.title}</h4>
-          <div><UseShare title={recipeDetails.title} url={url}/></div>
+          <h4>{data.title}</h4>
+          <div className='btn'><UseShare title={data.title} url={urls}/></div>
         </nav>
         <header>
           <div className='recipe-image'>
-            <img src={recipeDetails.image } alt={recipeDetails.title}/>
+            <img src={data.image } alt={data.title}/>
           </div>
           <div className='recipe-information'>
             <div className='info-icons'>
               <BiTime/>
-              <h4>{recipeDetails.readyInMinutes} minutes </h4>
+              <h4>{data.readyInMinutes} minutes </h4>
             </div>
             <div className='info-icons'>
               <AiOutlineEuroCircle/>
-            <h4>{finalPrize || <Skeleton/>} cents</h4>
+            <h4>{finalPrize} cents</h4>
             </div>
             <div className='info-icons'>
               <BsFillPeopleFill/>
-              <h4>{recipeDetails.servings} person</h4>
+              <h4>{data.servings} person</h4>
             </div>
             <div className='info-icons'>
               <AiOutlineHeart/>
-              <h4>{recipeDetails.healthScore} point</h4>
+              <h4>{data.healthScore} point</h4>
             </div>
           </div>
         </header>
@@ -110,18 +85,18 @@ const RecipeScreen = () => {
             <div className='recipe-information'>
               <div className='recipe-summary'>
                 <h4>Description</h4>
-                <p dangerouslySetInnerHTML={{__html: recipeDetails.summary}}></p>
+                <p dangerouslySetInnerHTML={{__html: data.summary}}></p>
               </div>
               <div className='recipe-instructions'>
                 <h4>Instructions</h4>
-                <p dangerouslySetInnerHTML={{__html: recipeDetails.instructions}}></p>
+                <p dangerouslySetInnerHTML={{__html: data.instructions}}></p>
               </div>
             </div>
             <div className='recipe-ingredient'>
               <h4>Ingredients</h4>
                 
               {
-                recipeDetails?.extendedIngredients?.map((items) =>{
+                data?.extendedIngredients?.map((items) =>{
                   return <li className='rounded' key={items.id}>{items.original}</li>
                 })
               }
@@ -135,7 +110,7 @@ const RecipeScreen = () => {
 
             <div className='content-similar'>
               {
-                similarRecipe.map((itemSimilar)=> {
+                recipes?.map((itemSimilar)=> {
                   return <SimilarRecipe key={itemSimilar.id}
                   {...itemSimilar}
                   handleFavouritesClick={addFavourite}
@@ -168,6 +143,11 @@ const Wrapper = styled.div`
         }
         svg{
           font-size:1.4rem;
+          transition:.2s;
+          &:hover{
+            transform:scale(1.2);
+          }
+          
         }
     }
     header{
@@ -177,7 +157,11 @@ const Wrapper = styled.div`
       gap:4rem;
       svg{
         font-size:1.4rem;
+        &:hover{
+        font-size:2rem;
       }
+      }
+      
     @media screen and (max-width: 949px) {
         flex-direction:column;
     }

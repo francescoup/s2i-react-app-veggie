@@ -145,7 +145,7 @@ const ContainerContact = styled.div`
           }
           h4{
             color:var(--soft-light-gray);
-            font-wight:400;
+            font-weight:400;
           }
       }
       .container-text{

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { AiOutlineShareAlt} from 'react-icons/ai';
-import SharingModal from './components/SharingModal';
+import SharingModal from './components/SharingModal/SharingModal.js';
 import styled from 'styled-components';
 
 const UseShare =  (props) => {
 const [isModalOpen, setIsModalOpen]  = useState(false)
-console.log(props)
+
   const shareData = {
     title: props.title,
     text: 'Sharing your favorite recipe',
     url:props.url
   }
 
-  console.log(shareData)
+ 
   const sharingDetails = async () => {
 
     if(navigator.share) {

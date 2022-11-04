@@ -1,13 +1,13 @@
 import React from 'react';
-import FavCards from '../components/FavCards';
+import FavCards from '../components/FavCards/FavCards.js';
 import styled from 'styled-components';
-import Footer from '../components/Footer';
 import { useGlobalContext } from '../Context';
 import useTitle from '../useTitle';
 
 const FavoriteScreen = () => {
-  useTitle('Your favorites recipes')
-  const {addFavourite, removeFavourite,  favourites} = useGlobalContext()
+
+  useTitle('Your favorites recipes');
+  const {addFavourite, removeFavourite,  favourites} = useGlobalContext();
   
   return <><div className='container'>
    

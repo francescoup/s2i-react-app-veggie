@@ -1,50 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import Cards from '../components/Cards.js';
+import Cards from '../components/Cards/Cards.js';
 import styled from 'styled-components';
-import Categories from '../components/Categories.js';
+import Categories from '../components/Categories/Categories.js';
 import { useGlobalContext } from '../Context.js';
 import useTitle from '../useTitle.js';
-import Loading from '../components/Loading.js';
-import Error from '../components/Error.js';
-
+import Loading from '../components/Loading/Loading.js';
+import Error from '../components/Error/Error.js';
+import useFetch from '../useFetch.js';
+const url =  `https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&tags=vegetarian&number=8`
 const HomeScreen = () => {
 
   useTitle('Home page')
   const{addFavourite}= useGlobalContext()
-  const [recipes, setRecipes] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
+  //Fetch data with useFetch hook
+  const {data, isLoading,isError} = useFetch(url)
   
-  
-  const url =  `https://api.spoonacular.com/recipes/random?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&tags=vegetarian&number=8`
-
-  const getRecipes = async () => {
-
-    setIsLoading(true);
-    setIsError(false)
-    try {
-      const getData = localStorage.getItem('recipes');
-      if(getData) {
-        setRecipes(JSON.parse(getData))
-      } else {
-        const response = await axios.get(url);
-        const data = await response.data;
-        localStorage.setItem('recipes', JSON.stringify(data.recipes))
-        setRecipes(data.recipes)
-         
-      }
-      
-    } catch (error) {
-      setIsError(true);
-      setIsLoading(false)
-    }
-  setIsLoading(false)
-  } 
-
-  useEffect(()=> {
-    getRecipes()
-  }, [])
   
   if(isLoading){
     return <Loading cards={8}/>
@@ -61,7 +32,7 @@ const HomeScreen = () => {
       <Wrapper>
   
         {
-        recipes.map((item) => {
+        data.recipes.map((item) => {
         
         return <Cards key={item.id} {...item}
         

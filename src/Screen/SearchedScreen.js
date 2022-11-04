@@ -1,46 +1,33 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import {useParams} from 'react-router-dom';
-import Cards from '../components/Cards';
+import Cards from '../components/Cards/Cards';
 import styled from 'styled-components';
 import { useGlobalContext } from '../Context';
 import useTitle from '../useTitle';
+import useFetch from '../useFetch';
 
 const SearchedScreen = () => {
 
-    useTitle('Search page')
-    const [searchRecipe, setSearchRecipe] = useState([])
-    const {addFavourite} = useGlobalContext()
-    const {query} = useParams()
+  useTitle('Search page')
+  const {addFavourite} = useGlobalContext();
+  const {query} = useParams();
 
-    const getSearch = async (query) => {
+  const url =`https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&number=8&query=${query}&diet=vegetarian`;
+  //Fetch data with useFetch custom hook
+  const {data, isLoading, isError} = useFetch(url);
+  //Map id from data
+  const idRecipe = data?.results?.map((recipe) => recipe.id).toString();
+  //Fetch full recipe details
+  const urlRecipe = `https://api.spoonacular.com/recipes/informationBulk?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&ids=${idRecipe}`
+  const {data: recipes, isLoading: isLoading2, isError: isError2} = useFetch(urlRecipe)  
 
-      try {
-        const responseSearch = await axios.get( `https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&number=8&query=${query}&diet=vegetarian`);
-        const dataSearch = responseSearch.data.results
-
-        const idRecipe = dataSearch.map((recipe) => recipe.id).toString()
   
-        const getRecipe = await axios.get(`https://api.spoonacular.com/recipes/informationBulk?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&ids=${idRecipe}`);
-        
-        setSearchRecipe(getRecipe.data)
-        
-      } catch (error) {
-        
-      }
-        
-    }
-
-    useEffect(() => {
-  
-      getSearch(query)
-    }, [query])
-
   return (
     <section className='container'>
       <Wrapper>
         {
-        searchRecipe.map((item) => {
+        recipes.map((item) => {
         return <Cards key={item.id} {...item}
         handleFavouritesClick = {addFavourite}
         datafav = {item}

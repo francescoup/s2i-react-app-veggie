@@ -1,61 +1,41 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useLocation } from 'react-router-dom';
 import axios from 'axios';
-import Categories from '../components/Categories';
-import Cards from '../components/Cards';
+import Categories from '../components/Categories/Categories';
+import Cards from '../components/Cards/Cards';
 import styled from 'styled-components';
 import { useGlobalContext } from '../Context';
-import Loading from '../components/Loading';
+import Loading from '../components/Loading/Loading';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import useTitle from '../useTitle';
-import Error from '../components/Error';
+import Error from '../components/Error/Error';
+import useFetch from '../useFetch';
 
 
 const CategoriesScreen = () => {
 
   useTitle('Recipes Categories');
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const{addFavourite} =useGlobalContext()
+  const{addFavourite} = useGlobalContext();
+  const location = useLocation();
   const {type} = useParams();
-  const location = useLocation()
+  const url =`https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&number=8&cuisine=${type}&diet=vegetarian`;
+  //Fetch data with useFetch custom hook
+  const {data, isLoading, isError} = useFetch(url);
+  //Map id from data
+  const idRecipe = data?.results?.map((recipe) => recipe.id).toString();
+  //Fetch full recipe details
+  const urlRecipe = `https://api.spoonacular.com/recipes/informationBulk?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&ids=${idRecipe}`
+  const {data: recipes, isLoading: isLoading2, isError: isError2} = useFetch(urlRecipe)  
 
 
-  const getCategories = async (type) => {
-
-    setIsLoading(true);
-    setIsError(false)
-
-    try {
-      const response = await axios.get(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&number=8&cuisine=${type}&diet=vegetarian`)
-      const data = await response.data.results
-
-      const idRecipe = data.map((recipe) => recipe.id).toString()
-  
-      const getRecipe = await axios.get(`https://api.spoonacular.com/recipes/informationBulk?apiKey=${process.env.REACT_APP_VEGGIE_API_KEY}&ids=${idRecipe}`);
-      setCategories(getRecipe.data);
-      setIsLoading(false)
-     
-    } catch (error) {
-      setIsError(true)
-    }
-    setIsLoading(false)
-  }
-
-  useEffect(()=> {
-    getCategories(type)
-  }, [type])
-
-  if(isLoading) {
+  if(isLoading2) {
     return <Loading cards={8}/>
   }
 
-  if(isError) {
+  if(isError2) {
     return <Error/>
   }
-
 
   return <>
   <section className='container'>
@@ -63,7 +43,7 @@ const CategoriesScreen = () => {
     <Categories/>
     <Wrapper>
       {
-        categories.map((item)=> {
+        recipes?.map((item)=> {
         return <Cards key={item.id} {...item}
           handleFavouritesClick = {addFavourite}
           datafav = {item}
