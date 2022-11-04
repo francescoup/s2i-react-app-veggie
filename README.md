@@ -13,9 +13,9 @@ This app fetch the data from Spoonacular free api, and then display it in home p
 * A save bottom to save the more interesting recipes.
 * A favorite bottom to show the recipes that you saved.
 
-![Home](src/screen-shots/home-page.png)
-![Favorite](src/screen-shots/recipe-page.png)
-![Mobile](src/screen-shots/mobile-home-page.png)
+![Home](screen-shots/home-page.png)
+![Favorite](screen-shots/recipe-page.png)
+![Mobile](screen-shots/mobile-home-page.png)
 
 ### Technologies
 
@@ -39,7 +39,7 @@ Download [Node](https://nodejs.org/en/) and installed it on your operating syste
 1. Clone the repository on local server:
 
    ```sh
-   git clone https://github.com/francescoup/
+   git clone https://github.com/francescoup/s2i-react-app-veggie
    ```
 
 2. Install NPM packages:
